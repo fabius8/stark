@@ -45,7 +45,7 @@ async function transfer() {
     console.log("发送成功!", `https://starkscan.co/tx/${call.transaction_hash}`)
 }
 
-async function starknetID_mint() {
+async function starknetID_mint(i) {
     const addrStarknetID = "0x05dbdedc203e92749e2e746e2d40a768d966bd243df04a6b712e222bc040a9af";
     const compiledContract = json.parse(fs.readFileSync("./starknetID.json").toString("ascii"));
     const starknetIDContract = new Contract(compiledContract, addrStarknetID, provider);
@@ -53,11 +53,13 @@ async function starknetID_mint() {
     ethContract.connect(account);
     const balance = await ethContract.balanceOf(account.address);
     console.log(account.address, " has a balance of :", uint256.uint256ToBN(balance.balance)/10**18);
-    
+    let num = i
+    let hex = num.toString(16)
     const calldata = stark.compileCalldata({
-        starknet_id: "0x75bcd15",
+        starknet_id: "0x" + hex,
     })
     console.log(calldata)
+    let nonce = await account.getNonce()
     const call = await account.execute({
         contractAddress: addrStarknetID,
         entrypoint: 'mint',
@@ -65,12 +67,23 @@ async function starknetID_mint() {
     },
     undefined,
     {
-        nonce: await account.getNonce()
+        nonce: nonce
     })
-    console.log("mint...", call)
-    await provider.waitForTransaction(call.transaction_hash)
+    console.log("mint...", call, "nonce:", nonce)
+    //await provider.waitForTransaction(call.transaction_hash)
     console.log("发送成功!", `https://starkscan.co/tx/${call.transaction_hash}`)
+    process.exit(0)
 }
 
-starknetID_mint()
+async function run(){
+    for(let i = 164; i < 200; i++){
+        try{
+            await starknetID_mint(i)
+        }
+        catch(e){
+            console.log(e.message)
+        }
+    }
+}
 
+run()
