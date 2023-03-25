@@ -72,7 +72,6 @@ async function starknetID_mint(i) {
     console.log("mint...", call, "nonce:", nonce)
     //await provider.waitForTransaction(call.transaction_hash)
     console.log("发送成功!", `https://starkscan.co/tx/${call.transaction_hash}`)
-    process.exit(0)
 }
 
 async function run(){
